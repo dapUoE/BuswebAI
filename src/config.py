@@ -8,7 +8,8 @@ class DatabaseConfig:
     """Configuration constants for the database system"""
     
     # Model Configuration
-    MODEL_NAME = 'all-MiniLM-L6-v2'
+    OPENAI_EMBEDDING_MODEL = 'text-embedding-3-small'
+    EMBEDDING_DIMENSION = 1536  # text-embedding-3-small dimension
     
     # Search Configuration
     DEFAULT_TOP_K = 3

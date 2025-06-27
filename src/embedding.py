@@ -5,17 +5,18 @@ Embedding operations for the company database system.
 import numpy as np
 import faiss
 from typing import List
-from sentence_transformers import SentenceTransformer
+from openai import OpenAI
+import os
 
 from config import DatabaseConfig
 from models import ValidationError, EmbeddingError
 
 # === MODEL SETUP ===
 try:
-    model = SentenceTransformer(DatabaseConfig.MODEL_NAME)
-    dimension = model.get_sentence_embedding_dimension()
+    client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+    dimension = DatabaseConfig.EMBEDDING_DIMENSION
 except Exception as e:
-    raise EmbeddingError(f"Failed to initialize model: {str(e)}")
+    raise EmbeddingError(f"Failed to initialize OpenAI client: {str(e)}")
 
 # === EMBEDDING FUNCTIONS ===
 def encode_text(text: str) -> np.ndarray:
@@ -27,7 +28,11 @@ def encode_text(text: str) -> np.ndarray:
         raise ValidationError("Text cannot be empty")
     
     try:
-        return model.encode(text)
+        response = client.embeddings.create(
+            model=DatabaseConfig.OPENAI_EMBEDDING_MODEL,
+            input=text
+        )
+        return np.array(response.data[0].embedding)
     except Exception as e:
         raise EmbeddingError(f"Failed to encode text: {str(e)}")
 

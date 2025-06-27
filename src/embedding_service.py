@@ -2,7 +2,8 @@
 
 from typing import Optional
 import numpy as np
-from sentence_transformers import SentenceTransformer
+from openai import OpenAI
+import os
 
 from config import DatabaseConfig
 from models import ValidationError, EmbeddingError
@@ -18,26 +19,26 @@ class EmbeddingService:
     
     def __init__(self, model_name: Optional[str] = None):
         """Initialize the embedding service with optional custom model."""
-        self._model_name = model_name or DatabaseConfig.MODEL_NAME
-        self._model: Optional[SentenceTransformer] = None
+        self._model_name = model_name or DatabaseConfig.OPENAI_EMBEDDING_MODEL
+        self._client: Optional[OpenAI] = None
         self._dimension: Optional[int] = None
     
     @property
-    def model(self) -> SentenceTransformer:
-        """Lazy-load the embedding model."""
-        if self._model is None:
+    def client(self) -> OpenAI:
+        """Lazy-load the OpenAI client."""
+        if self._client is None:
             try:
-                self._model = SentenceTransformer(self._model_name)
-                self._dimension = self._model.get_sentence_embedding_dimension()
+                self._client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+                self._dimension = DatabaseConfig.EMBEDDING_DIMENSION
             except Exception as e:
-                raise EmbeddingError(f"Failed to initialize model: {str(e)}")
-        return self._model
+                raise EmbeddingError(f"Failed to initialize OpenAI client: {str(e)}")
+        return self._client
     
     @property
     def dimension(self) -> int:
         """Get embedding dimension (lazy-loaded)."""
         if self._dimension is None:
-            _ = self.model  # Trigger model loading
+            _ = self.client  # Trigger client loading
         return self._dimension
     
     def create_text_embedding(self, text: str) -> np.ndarray:

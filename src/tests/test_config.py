@@ -11,11 +11,17 @@ def test_model_configuration():
     """Test model configuration constants"""
     print("Testing model configuration...")
     
-    # Test model name is set
-    assert DatabaseConfig.MODEL_NAME == 'all-MiniLM-L6-v2'
-    assert isinstance(DatabaseConfig.MODEL_NAME, str)
-    assert len(DatabaseConfig.MODEL_NAME) > 0
-    print("   ✓ Model name is valid")
+    # Test OpenAI embedding model is set
+    assert DatabaseConfig.OPENAI_EMBEDDING_MODEL == 'text-embedding-3-small'
+    assert isinstance(DatabaseConfig.OPENAI_EMBEDDING_MODEL, str)
+    assert len(DatabaseConfig.OPENAI_EMBEDDING_MODEL) > 0
+    print("   ✓ OpenAI embedding model is valid")
+    
+    # Test embedding dimension is set
+    assert DatabaseConfig.EMBEDDING_DIMENSION == 1536
+    assert isinstance(DatabaseConfig.EMBEDDING_DIMENSION, int)
+    assert DatabaseConfig.EMBEDDING_DIMENSION > 0
+    print("   ✓ Embedding dimension is valid")
 
 def test_search_configuration():
     """Test search configuration constants"""

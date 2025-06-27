@@ -10,17 +10,17 @@ import faiss
 from embedding import (
     encode_text, convert_to_numpy_array, create_embedding, 
     add_embedding_to_index, search_faiss_index, get_first_distances,
-    get_first_indices, combine_text_blob, round_score, model, dimension
+    get_first_indices, combine_text_blob, round_score, client, dimension
 )
 from models import ValidationError, EmbeddingError
 
-def test_model_initialization():
-    """Test that the model is properly initialized"""
-    print("Testing model initialization...")
+def test_client_initialization():
+    """Test that the OpenAI client is properly initialized"""
+    print("Testing OpenAI client initialization...")
     
-    # Model should be loaded
-    assert model is not None
-    print("   ✓ Model is initialized")
+    # Client should be loaded
+    assert client is not None
+    print("   ✓ OpenAI client is initialized")
     
     # Dimension should be set
     assert isinstance(dimension, int)
@@ -37,7 +37,7 @@ def test_encode_text():
     
     assert isinstance(embedding, np.ndarray)
     assert embedding.shape == (dimension,)
-    assert embedding.dtype == np.float32
+    assert embedding.dtype == np.float64
     print("   ✓ Text encoding produces correct embedding")
     
     # Test different texts produce different embeddings
@@ -75,7 +75,7 @@ def test_convert_to_numpy_array():
     print("Testing numpy array conversion...")
     
     # Create test embedding
-    embedding = np.random.rand(dimension).astype(np.float32)
+    embedding = np.random.rand(dimension).astype(np.float64)
     
     # Convert for FAISS
     faiss_array = convert_to_numpy_array(embedding)
@@ -145,7 +145,7 @@ def test_add_embedding_to_index():
     
     # Test wrong shape
     try:
-        wrong_shape = np.random.rand(dimension + 1).astype(np.float32)
+        wrong_shape = np.random.rand(dimension + 1).astype(np.float64)
         add_embedding_to_index(wrong_shape, vector_list, test_index, "test")
         assert False, "Should have raised EmbeddingError"
     except EmbeddingError as e:
@@ -328,7 +328,7 @@ if __name__ == "__main__":
     print("=== EMBEDDING TESTS ===")
     
     try:
-        test_model_initialization()
+        test_client_initialization()
         test_encode_text()
         test_convert_to_numpy_array()
         test_create_embedding()

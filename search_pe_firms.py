@@ -12,7 +12,7 @@ import os
 import sqlite3
 import numpy as np
 import faiss
-from sentence_transformers import SentenceTransformer
+from openai import OpenAI
 import logging
 
 # Setup logging
@@ -26,7 +26,7 @@ class PEFirmSearcher:
         self.ids_file = db_path.replace('.db', '_ids.npy')
         self.conn = None
         self.cursor = None
-        self.model = None
+        self.client = None
         self.faiss_index = None
         self.firm_ids = None
         
@@ -64,17 +64,21 @@ class PEFirmSearcher:
         
         logger.info(f"Loaded index with {self.faiss_index.ntotal} embeddings")
     
-    def _load_model(self):
-        """Load sentence transformer model"""
-        if self.model is None:
-            logger.info("Loading embedding model...")
-            self.model = SentenceTransformer('all-MiniLM-L6-v2')
-            logger.info("Model loaded successfully")
+    def _load_client(self):
+        """Load OpenAI client"""
+        if self.client is None:
+            logger.info("Loading OpenAI client...")
+            self.client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
+            logger.info("OpenAI client loaded successfully")
     
     def _create_embedding(self, text):
         """Create embedding for text"""
-        self._load_model()
-        return self.model.encode(text, convert_to_numpy=True)
+        self._load_client()
+        response = self.client.embeddings.create(
+            model='text-embedding-3-small',
+            input=text
+        )
+        return np.array(response.data[0].embedding)
     
     def search(self, query, top_k=30):
         """Search for PE firms similar to query"""
